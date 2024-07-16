@@ -8,20 +8,18 @@ import br.com.alura.literalura.repository.LivroRepository;
 import br.com.alura.literalura.service.ConsumoApi;
 import br.com.alura.literalura.service.ConverteDados;
 
-import java.util.Scanner;
+import java.util.*;
 
 public class Principal {
     private Scanner input = new Scanner(System.in);
-
     ConsumoApi consumoApi = new ConsumoApi();
-
     ConverteDados converteDados = new ConverteDados();
-
     private final String ENDERECO = "https://gutendex.com/books/?search=";
-
     private LivroRepository repository;
-
     private AutorRepository autorRepository;
+
+    private List<Livro> livros = new ArrayList<>();
+    private List<Autor> autores = new ArrayList<>();
 
     public Principal(LivroRepository repository, AutorRepository autorRepository) {
         this.repository = repository;
@@ -38,6 +36,8 @@ public class Principal {
                     4 - Listar autores vivos em um determinado ano
                     5 - Listar livros em determinado idioma
                     0 - Sair
+                    
+                    Digite uma opção: 
                     """;
             System.out.println(menu);
             option = input.nextInt();
@@ -72,6 +72,14 @@ public class Principal {
         var nomeLivro = input.nextLine();
         var json = consumoApi.obterDados(ENDERECO + nomeLivro.replace(" ", "+"));
         DadosApiResult dadosApiResult = converteDados.obterDados(json, DadosApiResult.class);
+
+        if(dadosApiResult.resultado().isEmpty()) {
+            System.out.println("Livro não encontrado");
+            buscarLivro();
+        } else {
+            System.out.println("Encontrado");
+        }
+
         Autor autor = new Autor(dadosApiResult.resultado().get(0).autor().get(0));
         Autor autorSalvo = autorRepository.save(autor);
         Livro livro = new Livro(dadosApiResult, autorSalvo);
@@ -79,19 +87,44 @@ public class Principal {
     }
 
     private void listarLivrosRegistrados() {
-        System.out.println("***Livros Registrado***");
+        System.out.println("***Livros registrados***");
+        livros = repository.findAll();
+        livros.stream()
+                .sorted(Comparator.comparing(Livro::getTitulo))
+                .forEach(System.out::println);
     }
 
     private void listarAutoresRegistrados() {
         System.out.println("***Autores***");
+        autores = autorRepository.findAll();
+        autores.stream()
+                .sorted(Comparator.comparing(Autor::getNome))
+                .forEach(System.out::println);
     }
 
     private void listarAutoresPorIdade() {
+        System.out.println("Digite o ano que do autor que deseja procurar:");
+        var anoProcura = input.nextInt();
         System.out.println("***Autores vivos no ano***");
+        List<Autor> autores = autorRepository.encontrarAutorPeloAno(anoProcura);
+        if(autores.isEmpty()) {
+            System.out.println("Nao foi encontrado");
+        } else {
+            autores.stream().forEach(System.out::println);
+        }
     }
 
     private void listarLivrosPorIdioma() {
         System.out.println("***Livros por idioma escolhido***");
+        System.out.println("Digite o idioma que gostaria de procurar:");
+        System.out.println("es - espanhol\npt - português\nfr - francês\nen - inglês\n");
+        var idiomaEscolhido = input.nextLine();
+        Optional<Livro> livros = repository.findByIdioma(idiomaEscolhido);
+        if(livros.isPresent()) {
+            livros.stream().forEach(System.out::println);
+        } else {
+            System.out.println("Não existem livros com esse idioma no sistema");
+        }
     }
 
 }
