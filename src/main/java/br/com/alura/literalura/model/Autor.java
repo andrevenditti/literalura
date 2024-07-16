@@ -18,8 +18,10 @@ public class Autor {
 
     public Autor(){}
 
-    public Autor(String nome) {
-        this.nome = nome;
+    public Autor(DadosAutor autor) {
+        this.nome = autor.nome();
+        this.anoNascimento = autor.anoNascimento();
+        this.anoFalescimento = autor.anosFalescimento();
     }
 
     public Long getId() {

@@ -21,7 +21,6 @@ public class ConsumoApi {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
         String json = response.body();
         return json;
     }

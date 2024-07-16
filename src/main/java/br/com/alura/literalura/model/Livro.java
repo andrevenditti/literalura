@@ -9,14 +9,17 @@ public class Livro {
     private Long id;
     private String titulo;
     private String idioma;
-    private String numeroDownload;
+    private Integer numeroDownload;
     @ManyToOne
     private Autor autor;
 
     public Livro() {}
 
-    public Livro(String titulo) {
-        this.titulo = titulo;
+    public Livro(DadosApiResult dadosApiResult, Autor autor) {
+        this.titulo = dadosApiResult.resultado().get(0).titulo();
+        this.idioma = dadosApiResult.resultado().get(0).idioma().get(0);
+        this.numeroDownload = dadosApiResult.resultado().get(0).numeroDownloads();
+        this.autor = autor;
     }
 
     public Long getId() {
@@ -43,12 +46,12 @@ public class Livro {
         this.idioma = idioma;
     }
 
-    public String getNumeroDownload() {
+    public Integer getNumeroDownload() {
         return numeroDownload;
     }
 
     public void setNumeroDownload(String numeroDowload) {
-        this.numeroDownload = numeroDowload;
+        this.numeroDownload = numeroDownload;
     }
 
     public Autor getAutor() {
